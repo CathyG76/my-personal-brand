@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+:root {
+  --bg: #fbfaf8;
+  --fg: #1a1a1a;
+  --muted: #6b6b6b;
+  --line: #e7e4de;
+  --accent: #b8552a;
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.prose p {
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+.prose {
+  white-space: pre-wrap;
+}
