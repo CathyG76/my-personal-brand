@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { updatePost } from "@/app/actions";
 import { PostForm } from "@/components/PostForm";
 import type { Post } from "@/lib/types";
@@ -13,7 +13,7 @@ export default async function EditPost({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("posts")
     .select("*")

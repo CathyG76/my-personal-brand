@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { deletePost, setPublished } from "@/app/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import type { Post } from "@/lib/types";
@@ -7,7 +7,7 @@ import type { Post } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const [{ data: postData }, { count: leadCount }] = await Promise.all([
     supabase.from("posts").select("*").order("created_at", { ascending: false }),
     supabase.from("leads").select("*", { count: "exact", head: true }),

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import type { LeadStatus } from "@/lib/types";
 
 function slugify(input: string): string {
@@ -17,7 +17,7 @@ function slugify(input: string): string {
 
 // ── Posts ─────────────────────────────────────────────────────────────────
 export async function createPost(formData: FormData) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) throw new Error("Title is required");
@@ -58,7 +58,7 @@ export async function createPost(formData: FormData) {
 }
 
 export async function updatePost(id: string, formData: FormData) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) throw new Error("Title is required");
@@ -100,7 +100,7 @@ export async function updatePost(id: string, formData: FormData) {
 }
 
 export async function setPublished(id: string, published: boolean) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("posts")
     .update({
@@ -114,7 +114,7 @@ export async function setPublished(id: string, published: boolean) {
 }
 
 export async function deletePost(id: string) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("posts").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/");
@@ -123,7 +123,7 @@ export async function deletePost(id: string) {
 
 // ── Leads ─────────────────────────────────────────────────────────────────
 export async function submitLead(formData: FormData) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
 
   const email = String(formData.get("email") ?? "").trim();
   const slug = String(formData.get("source_slug") ?? "").trim() || null;
@@ -159,7 +159,7 @@ export async function submitLead(formData: FormData) {
 }
 
 export async function setLeadStatus(id: string, status: LeadStatus) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("leads")
     .update({ status })
@@ -169,7 +169,7 @@ export async function setLeadStatus(id: string, status: LeadStatus) {
 }
 
 export async function deleteLead(id: string) {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("leads").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/leads");

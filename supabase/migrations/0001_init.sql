@@ -3,10 +3,10 @@
 --   posts  — the content the owner publishes and visitors read
 --   leads  — visitor sign-ups the sales team tracks
 --
--- Demo-first: the public site reads PUBLISHED posts via the anon key (RLS below).
--- Admin create/edit/delete runs through server actions using the service-role
--- key, which bypasses RLS. Anyone can INSERT a lead (the capture form); nobody
--- can read leads via the anon key — the admin inbox reads them via service role.
+-- Access model (only the anon key is provisioned — no service-role key):
+--   * Public (anon) can SELECT published posts and INSERT leads (the capture form).
+--   * The signed-in owner (authenticated) has full CRUD on posts and leads.
+--     Admin pages/actions run under the owner's session, so RLS lets them through.
 
 create extension if not exists pgcrypto;
 
@@ -59,15 +59,25 @@ create trigger posts_touch_updated_at
 alter table public.posts enable row level security;
 alter table public.leads enable row level security;
 
--- Public can read only published posts.
+-- Anyone may read PUBLISHED posts.
 drop policy if exists "posts_public_read" on public.posts;
 create policy "posts_public_read" on public.posts
   for select using (published = true);
 
--- Anyone can submit a lead; nobody can read leads via anon (admin uses service role).
+-- The signed-in owner has full control over posts (incl. drafts).
+drop policy if exists "posts_admin_all" on public.posts;
+create policy "posts_admin_all" on public.posts
+  for all to authenticated using (true) with check (true);
+
+-- Anyone may submit a lead (the capture form).
 drop policy if exists "leads_public_insert" on public.leads;
 create policy "leads_public_insert" on public.leads
-  for insert with check (true);
+  for insert to anon, authenticated with check (true);
+
+-- The signed-in owner has full control over leads (read inbox, update status, delete).
+drop policy if exists "leads_admin_all" on public.leads;
+create policy "leads_admin_all" on public.leads
+  for all to authenticated using (true) with check (true);
 
 -- ── seed (demo placeholders the owner can also edit/delete) ───────────────────
 insert into public.posts (title, slug, excerpt, body, cover_emoji, published, published_at)
@@ -102,6 +112,5 @@ values
 on conflict (slug) do nothing;
 
 insert into public.leads (name, email, message, status, source_slug)
-values
-  ('Sample Visitor', 'sample.lead@example.com', 'Loved the welcome post — would love to chat.', 'new', 'welcome')
-on conflict do nothing;
+select 'Sample Visitor', 'sample.lead@example.com', 'Loved the welcome post — would love to chat.', 'new', 'welcome'
+where not exists (select 1 from public.leads where email = 'sample.lead@example.com');

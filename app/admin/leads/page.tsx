@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { setLeadStatus, deleteLead } from "@/app/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import type { Lead, LeadStatus } from "@/lib/types";
@@ -15,7 +15,7 @@ const STATUS_COLOR: Record<LeadStatus, string> = {
 };
 
 export default async function LeadsInbox() {
-  const supabase = createAdminClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("leads")
     .select("*")
