@@ -7,11 +7,13 @@ export function SubmitButton({
   confirm,
   className,
   style,
+  formAction,
 }: {
   children: React.ReactNode;
   confirm?: string;
   className?: string;
   style?: React.CSSProperties;
+  formAction?: (formData: FormData) => void | Promise<void>;
 }) {
   const { pending } = useFormStatus();
   return (
@@ -20,6 +22,7 @@ export function SubmitButton({
       disabled={pending}
       className={className}
       style={style}
+      formAction={formAction}
       onClick={(e) => {
         if (confirm && !window.confirm(confirm)) e.preventDefault();
       }}
